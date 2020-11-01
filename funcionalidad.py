@@ -23,8 +23,8 @@ class Funciones():
 	def verAlbaran(self):
 		Funciones.datosCliente(self)
 	
-		tituloCliente='Datos del cliente'
-		tituloDatos='Datos del pedido'
+		tituloCliente=' Datos del cliente '
+		tituloDatos=' Datos del pedido '
 
 		with open('Prueba.txt','w') as p:
 			p.write(tituloCliente.center(70,'_'))
@@ -34,14 +34,31 @@ class Funciones():
 				wCliente=csv.reader(c)
 				for row in wCliente:
 					p.writelines('{:<14}{:<14}\n'.format(row[0],row[1]))
+					p.write('\n')
 
 			with open('Articulos.csv') as f:
 				wArticulos=csv.reader(f)
 				p.write(tituloDatos.center(70,'_'))
 				p.write('\n')
 
+				total=[]
 				for row in wArticulos:
 					p.writelines('{:<14}{:^14}{:^14}{:^14}{:^14}\n'.format(row[0],row[1],row[2],row[3],row[4]))
+					total.append(row[4])
+				
+				'''
+				1)-Elimina primer elemento de la lista total 'Subtotal'
+				2)-Convierte la lista a float 'result'
+				3)-Suma los elementos de la lista
+				
+				***FALTA convertir a string para poder escribir el resultado en el TXT(sólo acepta string)
+
+					'''
+				total.pop(0)
+				result = list(map(lambda x: float(x.replace(",", "")), total))
+				suma=(sum(result))
+				print(suma)
+				#p.write(total)
 
 	# Consulta campo ID y autocompleta los campos; Descripción,Métrica y Precio
 	def consultaBdd(self):
