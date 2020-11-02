@@ -34,7 +34,7 @@ class Funciones():
 				wCliente=csv.reader(c)
 				for row in wCliente:
 					p.writelines('{:<14}{:<14}\n'.format(row[0],row[1]))
-					p.write('\n')
+			p.write('\n')
 
 			with open('Articulos.csv') as f:
 				wArticulos=csv.reader(f)
@@ -44,21 +44,8 @@ class Funciones():
 				total=[]
 				for row in wArticulos:
 					p.writelines('{:<14}{:^14}{:^14}{:^14}{:^14}\n'.format(row[0],row[1],row[2],row[3],row[4]))
-					total.append(row[4])
-				
-				'''
-				1)-Elimina primer elemento de la lista total 'Subtotal'
-				2)-Convierte la lista a float 'result'
-				3)-Suma los elementos de la lista
-				
-				***FALTA convertir a string para poder escribir el resultado en el TXT(sólo acepta string)
 
-					'''
-				total.pop(0)
-				result = list(map(lambda x: float(x.replace(",", "")), total))
-				suma=(sum(result))
-				print(suma)
-				#p.write(total)
+				p.write('\n*Importe total: {}$'.format(str(self.suma)))
 
 	# Consulta campo ID y autocompleta los campos; Descripción,Métrica y Precio
 	def consultaBdd(self):
@@ -88,10 +75,8 @@ class Funciones():
 			self.obP1.set(valorPrecio)
 			self.obSb1.set(subTotal)
 
-
 			insertar=[descripcion,metrica,cantidad,valorPrecio,subTotal]
-
-			Funciones.insertArti(insertar)
+			Funciones.insertArti(self,insertar)
 			break
 
 	#----------------- Si no existe crea el archivo Articulos.csv e inserta fila encabezados ------
@@ -101,16 +86,35 @@ class Funciones():
 		if infoArticulos==False:
 			with open('Articulos.csv','w',newline='') as f:
 				w=csv.writer(f)
-				w.writerow(['Descripción','Métrica','Cantidad','Precio unidad','Subtotal','Total'])
+				w.writerow(['Descripción','Métrica','Cantidad','Precio unidad','Subtotal'])
 		else:
 			None
 
 		
 	#--------------- Inserta nuevos artículos ----------------------
-	def insertArti(datos):
+	#@staticmethod
+	def insertArti(self,datos):
 		with open('Articulos.csv','a',newline='') as f:
 			w = csv.writer(f,quoting=csv.QUOTE_NONNUMERIC)
 			w.writerow(datos)
+
+
+		with open('Articulos.csv') as f:
+			wArticulos=csv.reader(f)
+			total=[]
+
+			for row in wArticulos:
+				total.append(row[4])
+			'''----------------------------------------------------
+			1)-Elimina primer elemento de la lista total 'Subtotal'
+			2)-Convierte la lista a float 'result'
+			3)-Suma los elementos de la lista
+			4)-Convierte a string
+			-----------------------------------------------------'''
+			total.pop(0)
+			result = list(map(lambda n: float(n.replace(",", "")), total))
+			suma=(sum(result))
+			self.obTotal.set(round(suma,3))
 
 
 	#--------------- Consulta de productos en el almacen BDD -------------------------------------
