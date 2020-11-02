@@ -141,18 +141,19 @@ class Gestor():
         tSubtotal1.grid(row=5, column=5, pady=10, padx=10)
 
     def total(self):
-        self.obTo=tk.IntVar(value='')
-        lTotal=tk.Label(self.miFrame1, text='Total',bg='#3F3C3C',fg='#04B486')
-        lTotal.grid(row=7, column=6,sticky='ew', pady=5, padx=5)
-        tTotal=tk.Entry(self.miFrame1,textvariable=self.obTo,width=7, state="readonly")
-        tTotal.grid(row=7, column=7, pady=5, padx=5)
-        pass
+        self.obTotal=tk.IntVar(value='')
+        lTotal=tk.Label(self.miFrame3, text='Total',bg='#3F3C3C',fg='#04B486')
+        lTotal.grid(row=2, column=1,sticky='e', pady=5, padx=5)
+        tTotal=tk.Entry(self.miFrame3,textvariable=self.obTotal,width=12, state="readonly")
+        tTotal.grid(row=2, column=2, sticky='w',pady=10, padx=10)
+
 
     def verArticulos(self):
-        texto=open('Articulos.csv').readlines()
+        nuevoTexto=','.join(open('Articulos.csv').readlines())
         articuloTexto=tk.Text(self.miFrame3, width='70', height='10',fg='#A34B0C')
         articuloTexto.grid(row=1, column=0, columnspan=3, sticky='ew', padx=10, pady=10)
-        articuloTexto.insert(tk.INSERT, texto)
+        articuloTexto.insert(tk.INSERT, nuevoTexto)
+        self.total()
 
 
     def limpiarCampos(self):
