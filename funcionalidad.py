@@ -1,11 +1,14 @@
 import sqlite3
 from pathlib import Path
-from bdFerreteria import CrearBdd as bdd
+from bdFerreteria import CrearBdd
 import csv
+from os import remove
 
-class Funciones():
-	#----------------- Crea el archivo Datos cliente.csv ---------------------------------
-	@staticmethod
+class Funciones(CrearBdd):
+	def __init__(self):
+		self.suma=0
+
+ 	#----------------- Crea el archivo Datos cliente.csv ---------------------------------
 	def datosCliente(self):
 		datos_cliente=[
 		['Dni:',self.obDni.get()],
@@ -20,8 +23,8 @@ class Funciones():
 			w.writerows(datos_cliente)
 
 	# Crea un archivo de texto con los campos Nombre,Dni,Tel,Dirección, Apellidos y Datos del pedido.
-	def verAlbaran(self):
-		Funciones.datosCliente(self)
+	def generarAlbaran(self):
+		self.datosCliente()
 	
 		tituloCliente=' Datos del cliente '
 		tituloDatos=' Datos del pedido '
@@ -76,11 +79,11 @@ class Funciones():
 			self.obSb1.set(subTotal)
 
 			insertar=[descripcion,metrica,cantidad,valorPrecio,subTotal]
-			Funciones.insertArti(self,insertar)
+			self.insertArti(insertar)
 			break
 
 	#----------------- Si no existe crea el archivo Articulos.csv e inserta fila encabezados ------
-	def articulos():
+	def articulos(selef):
 		infoArticulos=Path('Articulos.csv').is_file()
 
 		if infoArticulos==False:
@@ -92,7 +95,6 @@ class Funciones():
 
 		
 	#--------------- Inserta nuevos artículos ----------------------
-	#@staticmethod
 	def insertArti(self,datos):
 		with open('Articulos.csv','a',newline='') as f:
 			w = csv.writer(f,quoting=csv.QUOTE_NONNUMERIC)
@@ -113,8 +115,8 @@ class Funciones():
 			-----------------------------------------------------'''
 			total.pop(0)
 			result = list(map(lambda n: float(n.replace(",", "")), total))
-			suma=(sum(result))
-			self.obTotal.set(round(suma,3))
+			self.suma=round((sum(result)),3)
+			self.obTotal.set(self.suma)
 
 
 	#--------------- Consulta de productos en el almacen BDD -------------------------------------
@@ -135,10 +137,10 @@ class Funciones():
 			self.cuadroTexto.insert('1.0','iD\t  {}\nMétrica  {}\nLargo  {}\nPrecio  {}\n'.format(iD,mT,largo,precio))
 			
 	#--------------- Evalua si existe el archivo BdFerretería -------------------------------------
-	def bdd_existe():
+	def bdd_existe(self):
 		archivo=Path('BdFerretería').is_file()
 
 		if archivo==False:
-			bdd.crearInsertar()
+			self.crearInsertar()
 		else:
-			None
+			None			
