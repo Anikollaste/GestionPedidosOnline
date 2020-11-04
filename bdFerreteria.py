@@ -2,7 +2,7 @@ import sqlite3
 
 class CrearBdd():
 
-	def crearInsertar():
+	def crearInsertar(self):
 
 		miConexion = sqlite3.connect("BdFerretería")
 		miCursor = miConexion.cursor()
