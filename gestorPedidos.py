@@ -1,7 +1,8 @@
 import tkinter as tk
-from funcionalidad import Funciones as fun
+from tkinter import messagebox as mb
+from funcionalidad import Funciones
 
-class Gestor():
+class Gestor(Funciones):
 
 
     def __init__(self, root):
@@ -15,29 +16,35 @@ class Gestor():
         self.miFrame1.pack()
         self.miFrame3=tk.Frame(root,bg='#3F3C3C')
         self.miFrame3.pack()
+        self.graficos()
 
         #-------------------------------- Crear la GUI ---------------------------------------------
-        self.graficos=self.dni(),self.apellido(),self.nombre(),self.direccion(),self.telefono(),self.busqueda(),
-        self.codidoProductos(),self.descripcion(),self.metrica(),self.cantidad(),self.precio(),self.subtotal(),
-        self.mensajes()
 
         #----------- Obtener valores Código producto y autocompletar Descripción, unidad, precio-------
         self.consulta=tk.Button(self.miFrame3,text='Añadir artículo',fg='#2192AC',bg='#3F3C3C',
-            command=lambda:fun.consultaBdd(self)).grid(row=0,column=0,pady=5,padx=5)
+            command=lambda:self.consultaBdd()).grid(row=0,column=0,pady=5,padx=5)
         
-        #--------------- Listar árticulos en el pedido ------------------------------------------------
+        #--------------- Listar árticulos en el pedido -------------------------------------------------
         self.listaArticulos=tk.Button(self.miFrame3,text='Lista de artículos',fg='#2192AC'
             ,bg='#3F3C3C',command=lambda:self.verArticulos()).grid(row=0,column=1,pady=5,padx=5)
         
-        #--------------- Obtener valores de los Entry para generar Pedido.txt--------------------------
+        #--------------- Obtener valores de los Entry para generar Pedido.txt---------------------------
         self.guardar=tk.Button(self.miFrame3,text='Generar pedido',fg='#2192AC',bg='#3F3C3C',
-            command=lambda:fun.verAlbaran(self)).grid(row=0,column=2,pady=5,padx=5)
+            command=lambda:self.generarAlbaran()).grid(row=0,column=2,pady=5,padx=5)
         
         #----------- Si la base de datos no existe la crea e inserta productos--------------------------
-        fun.bdd_existe()
+        self.bdd_existe()
 
-        #----------- Si el archivo Articulos.csv no exite lo crea ------------------------------
-        fun.articulos()
+        #----------- Si el archivo Articulos.csv no exite lo crea --------------------------------------
+        self.articulos()
+
+        #----------- Variable del método total ---------------------------------------------------------
+        self.obTotal=tk.IntVar(value='')
+
+    def graficos(self):
+        self.dni(),self.apellido(),self.nombre(),self.direccion(),self.telefono(),self.busqueda(),
+        self.codidoProductos(),self.descripcion(),self.metrica(),self.cantidad(),self.precio(),self.subtotal(),
+        self.mensajes()
 
     def dni(self):
         self.obDni=tk.StringVar()
@@ -86,7 +93,7 @@ class Gestor():
         lDescripcion.grid(row=5, column=0,sticky='w', pady=10, padx=10)
         tBusqueda=tk.Entry(self.miFrame2,textvariable=self.vBus,width=10,fg='#A34B0C')
         tBusqueda.grid(row=5, column=1,sticky='w', pady=5, padx=5)
-        bBusqueda=tk.Button(self.miFrame2,text='Buscar',fg='#2192AC',bg='#3F3C3C',command=lambda:fun.consultaAlmacen(self))
+        bBusqueda=tk.Button(self.miFrame2,text='Buscar',fg='#2192AC',bg='#3F3C3C',command=lambda:self.consultaAlmacen())
         bBusqueda.grid(row=5,column=2,sticky='w',pady=5,padx=5)
         self.cuadroTexto=tk.Text(self.miFrame2, width='40', height='5',fg='#A34B0C')
         self.cuadroTexto.grid(row=5, column=3, padx=10, pady=10)
@@ -141,7 +148,6 @@ class Gestor():
         tSubtotal1.grid(row=5, column=5, pady=10, padx=10)
 
     def total(self):
-        self.obTotal=tk.IntVar(value='')
         lTotal=tk.Label(self.miFrame3, text='Total',bg='#3F3C3C',fg='#04B486')
         lTotal.grid(row=2, column=1,sticky='e', pady=5, padx=5)
         tTotal=tk.Entry(self.miFrame3,textvariable=self.obTotal,width=12, state="readonly")
@@ -154,6 +160,16 @@ class Gestor():
         articuloTexto.grid(row=1, column=0, columnspan=3, sticky='ew', padx=10, pady=10)
         articuloTexto.insert(tk.INSERT, nuevoTexto)
         self.total()
+
+        #--------------- Ventana emergente confirma guardar el pedido y elimina archivos Articulos y Datos cliente
+    def eliminarArchivos():
+        eliminar=[]
+        valor=mb.askokcancel('Opción para albarán', '''El albarán ha sido creado.
+            Si pulsa en aceptar los datos ya no podrtán ser modificados por la aplicación y se creará un nuevo pedido''')
+        valor
+
+        if valor:
+            remove("Prueba.txt")
 
 
     def limpiarCampos(self):
