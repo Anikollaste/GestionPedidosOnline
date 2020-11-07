@@ -3,6 +3,7 @@ from pathlib import Path
 from bdFerreteria import CrearBdd
 import csv
 from os import remove
+import time
 
 class Funciones(CrearBdd):
 	def __init__(self):
@@ -29,7 +30,7 @@ class Funciones(CrearBdd):
 		tituloCliente=' Datos del cliente '
 		tituloDatos=' Datos del pedido '
 
-		with open('Prueba.txt','w') as p:
+		with open('Albarán.txt','w') as p:
 			p.write(tituloCliente.center(70,'_'))
 			p.write('\n')
 
@@ -44,11 +45,10 @@ class Funciones(CrearBdd):
 				p.write(tituloDatos.center(70,'_'))
 				p.write('\n')
 
-				total=[]
 				for row in wArticulos:
 					p.writelines('{:<14}{:^14}{:^14}{:^14}{:^14}\n'.format(row[0],row[1],row[2],row[3],row[4]))
-
 				p.write('\n*Importe total: {}$'.format(str(self.suma)))
+
 
 	# Consulta campo ID y autocompleta los campos; Descripción,Métrica y Precio
 	def consultaBdd(self):
@@ -77,13 +77,16 @@ class Funciones(CrearBdd):
 			self.obM1.set(metrica)
 			self.obP1.set(valorPrecio)
 			self.obSb1.set(subTotal)
-
+			
 			insertar=[descripcion,metrica,cantidad,valorPrecio,subTotal]
 			self.insertArti(insertar)
 			break
 
+		#time.sleep(2)
+		#self.limpiarArticulos()
+
 	#----------------- Si no existe crea el archivo Articulos.csv e inserta fila encabezados ------
-	def articulos(selef):
+	def articulos(self):
 		infoArticulos=Path('Articulos.csv').is_file()
 
 		if infoArticulos==False:
@@ -143,4 +146,15 @@ class Funciones(CrearBdd):
 		if archivo==False:
 			self.crearInsertar()
 		else:
-			None			
+			None
+
+	# def eliminarArchivos(self):
+	# 	datosAlbaran=['Datos_Cliente.csv','Articulos.csv']
+
+	# 	if self.emergente()==False:
+	# 		for arch in datosAlbaran:
+	# 			remove(arch)
+	# 		self.limpiarCampos()
+	# 	else:
+	# 		root.destroy()
+	
