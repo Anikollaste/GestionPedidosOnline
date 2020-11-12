@@ -4,10 +4,26 @@ from bdFerreteria import CrearBdd
 import csv
 from os import remove
 import time
+import tkinter as tk
+from tkinter import filedialog
+import pandas as pd
 
 class Funciones(CrearBdd):
-	def __init__(self):
-		self.suma=0
+
+
+	#----------------- Dado un nombre guarda el archivo con los datos del pedido ------------------
+	def guardar_archivo(self):
+		archivo_guardado=filedialog.asksaveasfilename(initialdir="/home",title="Selecciona archivo",
+			defaultextension=".txt",filetypes = (("txt files","*.txt"),("all files","*.*")))
+
+		self.generarAlbaran()
+		archivo=open(archivo_guardado,"w")
+		with open('Albaran.txt','r') as p:
+			l=p.readlines()
+			p.close()
+		archivo.writelines(l)
+		archivo.close()
+
 
  	#----------------- Crea el archivo Datos cliente.csv ---------------------------------
 	def datosCliente(self):
@@ -18,10 +34,13 @@ class Funciones(CrearBdd):
 		['Nombre:',self.obNombre.get()],
 		['Dirección:',self.obDireccion.get()]
 		]
+		infoCliente=Path('Datos_Cliente.csv').is_file()
 
-		with open('Datos_Cliente.csv','w',newline='') as f:
-			w=csv.writer(f)
-			w.writerows(datos_cliente)
+		if infoCliente==False:
+			with open('Datos_Cliente.csv','w',newline='') as f:
+				w=csv.writer(f)
+				w.writerows(datos_cliente)
+
 
 	# Crea un archivo de texto con los campos Nombre,Dni,Tel,Dirección, Apellidos y Datos del pedido.
 	def generarAlbaran(self):
@@ -30,7 +49,7 @@ class Funciones(CrearBdd):
 		tituloCliente=' Datos del cliente '
 		tituloDatos=' Datos del pedido '
 
-		with open('Albarán.txt','w') as p:
+		with open('Albaran.txt','w') as p:
 			p.write(tituloCliente.center(70,'_'))
 			p.write('\n')
 
@@ -47,11 +66,12 @@ class Funciones(CrearBdd):
 
 				for row in wArticulos:
 					p.writelines('{:<14}{:^14}{:^14}{:^14}{:^14}\n'.format(row[0],row[1],row[2],row[3],row[4]))
-				p.write('\n*Importe total: {}$'.format(str(self.suma)))
+			p.write('\n*Importe total: {}$'.format(str(self.suma)))
 
 
 	# Consulta campo ID y autocompleta los campos; Descripción,Métrica y Precio
 	def consultaBdd(self):
+
 		conexion=sqlite3.connect("BdFerretería")
 		cursor=conexion.cursor()
 
@@ -82,9 +102,6 @@ class Funciones(CrearBdd):
 			self.insertArti(insertar)
 			break
 
-		#time.sleep(2)
-		#self.limpiarArticulos()
-
 	#----------------- Si no existe crea el archivo Articulos.csv e inserta fila encabezados ------
 	def articulos(self):
 		infoArticulos=Path('Articulos.csv').is_file()
@@ -97,29 +114,17 @@ class Funciones(CrearBdd):
 			None
 
 		
-	#--------------- Inserta nuevos artículos ----------------------
+	#--------------- Inserta nuevos artículos y obtiene Total----------------------
 	def insertArti(self,datos):
+		self.articulos()
+
 		with open('Articulos.csv','a',newline='') as f:
 			w = csv.writer(f,quoting=csv.QUOTE_NONNUMERIC)
 			w.writerow(datos)
 
-
-		with open('Articulos.csv') as f:
-			wArticulos=csv.reader(f)
-			total=[]
-
-			for row in wArticulos:
-				total.append(row[4])
-			'''----------------------------------------------------
-			1)-Elimina primer elemento de la lista total 'Subtotal'
-			2)-Convierte la lista a float 'result'
-			3)-Suma los elementos de la lista
-			4)-Convierte a string
-			-----------------------------------------------------'''
-			total.pop(0)
-			result = list(map(lambda n: float(n.replace(",", "")), total))
-			self.suma=round((sum(result)),3)
-			self.obTotal.set(self.suma)
+		df=pd.read_csv('Articulos.csv')
+		self.suma=round(df['Subtotal'].sum(),2)
+		self.obTotal.set(self.suma)
 
 
 	#--------------- Consulta de productos en el almacen BDD -------------------------------------
@@ -131,6 +136,14 @@ class Funciones(CrearBdd):
 		articulos = cursor.fetchall()
 		conexion.commit()
 		conexion.close()
+		#################################################################################
+		#						Por revisar		
+
+		# with open('BusquedaBdd.csv','w') as b:
+		# 	w=csv.writer(b)
+		# 	w.writerows(articulos)
+		# df=pd.read_csv('BusquedaBdd.csv',columns=['ID','Métrica','Largo','Precio'])
+		#################################################################################
 
 		for nomArt in articulos:
 			iD=nomArt[0]
@@ -138,6 +151,7 @@ class Funciones(CrearBdd):
 			largo=nomArt[3]
 			precio=nomArt[4]
 			self.cuadroTexto.insert('1.0','iD\t  {}\nMétrica  {}\nLargo  {}\nPrecio  {}\n'.format(iD,mT,largo,precio))
+
 			
 	#--------------- Evalua si existe el archivo BdFerretería -------------------------------------
 	def bdd_existe(self):
@@ -148,13 +162,17 @@ class Funciones(CrearBdd):
 		else:
 			None
 
-	# def eliminarArchivos(self):
-	# 	datosAlbaran=['Datos_Cliente.csv','Articulos.csv']
 
-	# 	if self.emergente()==False:
-	# 		for arch in datosAlbaran:
-	# 			remove(arch)
-	# 		self.limpiarCampos()
-	# 	else:
-	# 		root.destroy()
+	#--------------- Elimina archivos al salir de la aplicación
+	def eliminarArchivos(self):
+		datosAlbaran=['Datos_Cliente.csv','Articulos.csv','Albaran.txt']
+
+		for arch in datosAlbaran:
+			try:
+				remove(arch)
+			except FileNotFoundError:
+				None
+		self.root.destroy()
+
+
 	
