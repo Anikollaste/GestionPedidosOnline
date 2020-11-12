@@ -1,6 +1,6 @@
 import tkinter as tk
-from tkinter import filedialog as fidi
 from funcionalidad import Funciones
+import pandas as pd
 import time
 
 class Gestor(Funciones):
@@ -19,6 +19,7 @@ class Gestor(Funciones):
         self.miFrame1.pack()
         self.miFrame3=tk.Frame(self.root,bg='#3F3C3C')
         self.miFrame3.pack()
+        self.suma=0
         self.graficos()
        
 
@@ -26,15 +27,12 @@ class Gestor(Funciones):
         self.consulta=tk.Button(self.miFrame3,text='Añadir artículo',fg='#2192AC',bg='#3F3C3C',
             command=lambda:self.consultaBdd()).grid(row=0,column=0,pady=5,padx=5)
         
-        #--------------- Listar árticulos en el pedido -------------------------------------------------
+        #--------------- Listar árticulos en el pedido ------------------------------------------------
         self.listaArticulos=tk.Button(self.miFrame3,text='Lista de artículos',fg='#2192AC'
             ,bg='#3F3C3C',command=lambda:self.verArticulos()).grid(row=0,column=1,pady=5,padx=5)
                 
-        #----------- Si la base de datos no existe la crea e inserta productos--------------------------
+        #----------- Si la Bdd no existe la crea -------------------------------------------------------
         self.bdd_existe()
-
-        #----------- Si el archivo Articulos.csv no exite lo crea --------------------------------------
-        self.articulos()
 
         #----------- Variable del método total ---------------------------------------------------------
         self.obTotal=tk.IntVar(value='')
@@ -42,12 +40,15 @@ class Gestor(Funciones):
     def barraMenu(self):
         archivoArchi=tk.Menu(self.bMenu, tearoff=0)
         self.bMenu.add_cascade(label='Archivo', menu=archivoArchi)
+        #archivoArchi.add_command(label='Nuevo',command=lambda:self.eliminarArchivos())
+        #archivoArchi.add_command(label='Guardar',command=lambda:self.generarAlbaran())
         archivoArchi.add_command(label='Guardar como',command=lambda:self.guardar_archivo())
-    
+
     def barraApli(self):
         archivoAplica=tk.Menu(self.bMenu, tearoff=0)
         self.bMenu.add_cascade(label='Aplicación', menu=archivoAplica)
         archivoAplica.add_command(label='Borrar campos',command=lambda:self.limpiarAllCampos())
+        archivoAplica.add_command(label='Salir',command=lambda:self.eliminarArchivos())
 
     def graficos(self):
         self.barraMenu(),self.barraApli(),self.dni(),self.apellido(),self.nombre(),self.direccion(),self.telefono(),
@@ -156,71 +157,48 @@ class Gestor(Funciones):
         self.tSubtotal1.grid(row=5, column=5, pady=10, padx=10)
 
     def total(self):
-        lTotal=tk.Label(self.miFrame3, text='Total',bg='#3F3C3C',fg='#04B486')
-        lTotal.grid(row=2, column=1,sticky='e', pady=5, padx=5)
+        self.lTotal=tk.Label(self.miFrame3, text='Total',bg='#3F3C3C',fg='#04B486')
+        self.lTotal.grid(row=2, column=1,sticky='e', pady=5, padx=5)
         self.tTotal=tk.Entry(self.miFrame3,textvariable=self.obTotal,width=12)#state="readonly"
         self.tTotal.grid(row=2, column=2, sticky='w',pady=10, padx=10)
 
 
     def verArticulos(self):
-        nuevoTexto=','.join(open('Articulos.csv').readlines())
+        df=pd.read_csv('Articulos.csv')
         self.articuloTexto=tk.Text(self.miFrame3, width='70', height='10',fg='#A34B0C')
         self.articuloTexto.grid(row=1, column=0, columnspan=3, sticky='ew', padx=10, pady=10)
-        self.articuloTexto.insert(tk.INSERT, nuevoTexto)
+        self.articuloTexto.insert(tk.INSERT, df)
         self.total()
 
-
-    def guardar_archivo(self):
-        archivo_guardado=fidi.asksaveasfilename(initialdir = "/home",title = "Select file",defaultextension=".txt",
-                                 filetypes = (("txt files","*.txt"),
-                                              ("all files","*.*")))
-
-        self.generarAlbaran()
-        archivo=open(archivo_guardado,"w")
-        with open('Albarán.txt','r') as p:
-            l=p.readlines()
-            p.close()
-        archivo.writelines(l)
-        archivo.close()
-
-
     def limpiarAllCampos(self):
-        self.tDni.delete('0','end')
-        self.tTel.delete('0','end')
-        self.tApellido.delete('0','end')
-        self.tNombre.delete('0','end')
-        self.tDireccion.delete('0','end')
-        self.tBusqueda.delete('0','end')
-        self.cuadroTexto.delete('1.0','end')
-        self.tMensajes.delete('0','end')
-        self.tTotal.delete('0','end')
-        self.articuloTexto.delete('1.0','end')
+        self.tDni.delete('0',tk.END)
+        self.tTel.delete('0',tk.END)
+        self.tApellido.delete('0',tk.END)
+        self.tNombre.delete('0',tk.END)
+        self.tDireccion.delete('0',tk.END)
+        self.tBusqueda.delete('0',tk.END)
+        self.cuadroTexto.delete('1.0',tk.END)
+        self.tMensajes.delete('0',tk.END)
         self.limpiarEntrys()
 
     def limpiarEntrys(self):
-        time.sleep(2)
-        self.tCodigo1.delete('0','end')
-        self.tCantidad1.delete('0','end')
-
         self.tDes1.config(state=tk.NORMAL)
-        self.tDes1.delete('0','end')
-        self.tDes1.config(state='readonly')
-        
         self.tM1.config(state=tk.NORMAL)
-        self.tM1.delete('0','end')
-        self.tM1.config(state='readonly')
-
         self.tPrecio1.config(state=tk.NORMAL)
-        self.tPrecio1.delete('0','end')
-        self.tPrecio1.config(state='readonly')
-
         self.tSubtotal1.config(state=tk.NORMAL)
-        self.tSubtotal1.delete('0','end')
-        self.tSubtotal1.config(state='readonly')
 
-    def  loop(self):
-        self.root.mainloop()
+        self.tDes1.delete('0',tk.END)
+        self.tM1.delete('0',tk.END)
+        self.tPrecio1.delete('0',tk.END)
+        self.tSubtotal1.delete('0',tk.END)
+        self.tCodigo1.delete('0',tk.END)
+        self.tCantidad1.delete('0',tk.END)
+
+        self.tDes1.config(state='readonly')
+        self.tM1.config(state='readonly')
+        self.tPrecio1.config(state='readonly')
+        self.tSubtotal1.config(state='readonly')
 
 
 gui=Gestor()
-gui.loop()
+gui.root.mainloop()
