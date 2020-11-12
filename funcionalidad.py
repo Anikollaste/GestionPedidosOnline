@@ -7,8 +7,16 @@ import time
 import tkinter as tk
 from tkinter import filedialog
 import pandas as pd
+import threading
 
 class Funciones(CrearBdd):
+
+	def insertClear(self):
+		hiloConsulta=threading.Thread(target=self.consultaBdd())
+		hiloConsulta.start()
+		hiloConsulta.join()
+		time.sleep(2)
+		self.limpiarEntrys()
 
 
 	#----------------- Dado un nombre guarda el archivo con los datos del pedido ------------------
@@ -102,6 +110,7 @@ class Funciones(CrearBdd):
 			self.insertArti(insertar)
 			break
 
+
 	#----------------- Si no existe crea el archivo Articulos.csv e inserta fila encabezados ------
 	def articulos(self):
 		infoArticulos=Path('Articulos.csv').is_file()
@@ -130,27 +139,11 @@ class Funciones(CrearBdd):
 	#--------------- Consulta de productos en el almacen BDD -------------------------------------
 	def consultaAlmacen(self):
 		conexion=sqlite3.connect("BdFerretería")
-		cursor=conexion.cursor()
-		cursor.execute("SELECT * FROM PRODUCTOS WHERE NOMBRE_ARTICULO = '{}'".format(self.vBus.get().lower()))
+		consulta=pd.read_sql("SELECT * FROM PRODUCTOS WHERE NOMBRE_ARTICULO = '{}'".format(self.vBus.get().lower()),
+			conexion)
 
-		articulos = cursor.fetchall()
-		conexion.commit()
+		self.cuadroTexto.insert('1.0',consulta)
 		conexion.close()
-		#################################################################################
-		#						Por revisar		
-
-		# with open('BusquedaBdd.csv','w') as b:
-		# 	w=csv.writer(b)
-		# 	w.writerows(articulos)
-		# df=pd.read_csv('BusquedaBdd.csv',columns=['ID','Métrica','Largo','Precio'])
-		#################################################################################
-
-		for nomArt in articulos:
-			iD=nomArt[0]
-			mT=nomArt[2]
-			largo=nomArt[3]
-			precio=nomArt[4]
-			self.cuadroTexto.insert('1.0','iD\t  {}\nMétrica  {}\nLargo  {}\nPrecio  {}\n'.format(iD,mT,largo,precio))
 
 			
 	#--------------- Evalua si existe el archivo BdFerretería -------------------------------------
@@ -163,7 +156,7 @@ class Funciones(CrearBdd):
 			None
 
 
-	#--------------- Elimina archivos al salir de la aplicación
+	#--------------- Elimina archivos al salir de la aplicación -------------------------------
 	def eliminarArchivos(self):
 		datosAlbaran=['Datos_Cliente.csv','Articulos.csv','Albaran.txt']
 
